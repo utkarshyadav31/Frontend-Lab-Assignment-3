@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>To-Do List</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: Arial, sans-serif; background: #eef2f7; display: flex; justify-content: center; padding: 50px 15px; margin: 0; }
+  .app { background: #fff; width: 100%; max-width: 420px; padding: 25px; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,.12); }
+  h2 { text-align: center; margin-top: 0; }
+  .add { display: flex; gap: 8px; }
+  .add input { flex: 1; padding: 10px; border: 1px solid #bbb; border-radius: 6px; font-size: 15px; }
+  .add button { padding: 10px 16px; background: #2f7de1; color: #fff; border: 0; border-radius: 6px; cursor: pointer; font-size: 15px; }
+  ul { list-style: none; padding: 0; margin: 20px 0 0; }
+  li { display: flex; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid #eee; }
+  li span { flex: 1; cursor: pointer; word-break: break-word; }
+  li.done span { text-decoration: line-through; color: #999; }
+  li button { background: #e63946; color: #fff; border: 0; border-radius: 5px; padding: 5px 10px; cursor: pointer; }
+  #count { text-align: center; color: #666; font-size: 14px; margin-top: 15px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <h2>My To-Do List</h2>
+  <div class="add">
+    <input type="text" id="taskInput" placeholder="Add a new task...">
+    <button onclick="addTask()">Add</button>
+  </div>
+  <ul id="list"></ul>
+  <div id="count"></div>
+</div>
+
+<script>
+let tasks = [];
+try { tasks = JSON.parse(localStorage.getItem("tasks")) || []; } catch (e) {}
+
+const input = document.getElementById("taskInput");
+input.addEventListener("keydown", e => { if (e.key === "Enter") addTask(); });
+
+function save() { try { localStorage.setItem("tasks", JSON.stringify(tasks)); } catch (e) {} }
+
+function addTask() {
+  const text = input.value.trim();
+  if (!text) return;
+  tasks.push({ text, done: false });
+  input.value = "";
+  save(); render();
+}
+
+function toggleTask(i) { tasks[i].done = !tasks[i].done; save(); render(); }
+function deleteTask(i) { tasks.splice(i, 1); save(); render(); }
+
+function render() {
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+  tasks.forEach((t, i) => {
+    const li = document.createElement("li");
+    if (t.done) li.className = "done";
+
+    const cb = document.createElement("input");
+    cb.type = "checkbox"; cb.checked = t.done;
+    cb.onchange = () => toggleTask(i);
+
+    const span = document.createElement("span");
+    span.textContent = t.text;
+    span.onclick = () => toggleTask(i);
+
+    const del = document.createElement("button");
+    del.textContent = "Delete";
+    del.onclick = () => deleteTask(i);
+
+    li.append(cb, span, del);
+    list.appendChild(li);
+  });
+  const left = tasks.filter(t => !t.done).length;
+  document.getElementById("count").textContent =
+    tasks.length ? `${left} of ${tasks.length} tasks remaining` : "No tasks yet. Add one above!";
+}
+render();
+</script>
+</body>
+</html>

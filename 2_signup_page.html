@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign Up</title>
+<style>
+  * { box-sizing: border-box; }
+  body { font-family: Arial, sans-serif; background: #eef2f7; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+  form { background: #fff; padding: 30px; border-radius: 12px; width: 360px; box-shadow: 0 4px 16px rgba(0,0,0,.12); }
+  h2 { text-align: center; margin-top: 0; }
+  .field { margin-bottom: 14px; }
+  label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
+  input { width: 100%; padding: 10px; border: 1px solid #bbb; border-radius: 6px; font-size: 15px; }
+  input.invalid { border-color: #d62828; }
+  input.valid { border-color: #1e9e4a; }
+  .msg { color: #d62828; font-size: 12px; min-height: 16px; margin-top: 3px; }
+  button { width: 100%; padding: 12px; background: #2f7de1; color: #fff; border: 0; border-radius: 6px; font-size: 16px; cursor: pointer; }
+  button:hover { background: #1f63bd; }
+  #success { color: #1e9e4a; text-align: center; margin-top: 12px; font-weight: bold; }
+</style>
+</head>
+<body>
+<form id="signupForm" novalidate>
+  <h2>Create Account</h2>
+
+  <div class="field">
+    <label for="name">Full Name</label>
+    <input type="text" id="name" placeholder="John Doe">
+    <div class="msg"></div>
+  </div>
+  <div class="field">
+    <label for="email">Email</label>
+    <input type="email" id="email" placeholder="you@example.com">
+    <div class="msg"></div>
+  </div>
+  <div class="field">
+    <label for="phone">Phone (10 digits)</label>
+    <input type="text" id="phone" placeholder="9876543210">
+    <div class="msg"></div>
+  </div>
+  <div class="field">
+    <label for="password">Password</label>
+    <input type="password" id="password" placeholder="Min 8 chars, letter + number">
+    <div class="msg"></div>
+  </div>
+  <div class="field">
+    <label for="confirm">Confirm Password</label>
+    <input type="password" id="confirm" placeholder="Re-enter password">
+    <div class="msg"></div>
+  </div>
+
+  <button type="submit">Sign Up</button>
+  <div id="success"></div>
+</form>
+
+<script>
+const form = document.getElementById("signupForm");
+
+const rules = {
+  name: v => v.trim().length >= 3 && /^[A-Za-z ]+$/.test(v.trim()) ? "" : "Name must be at least 3 letters (letters only).",
+  email: v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? "" : "Enter a valid email address.",
+  phone: v => /^[6-9]\d{9}$/.test(v) ? "" : "Enter a valid 10-digit phone number.",
+  password: v => /^(?=.*[A-Za-z])(?=.*\d).{8,}$/.test(v) ? "" : "Password needs 8+ characters with a letter and a number.",
+  confirm: v => v === document.getElementById("password").value && v !== "" ? "" : "Passwords do not match."
+};
+
+function validateField(id) {
+  const input = document.getElementById(id);
+  const error = rules[id](input.value);
+  input.nextElementSibling.textContent = error;
+  input.classList.toggle("invalid", !!error);
+  input.classList.toggle("valid", !error);
+  return !error;
+}
+
+Object.keys(rules).forEach(id =>
+  document.getElementById(id).addEventListener("input", () => validateField(id))
+);
+
+form.addEventListener("submit", e => {
+  e.preventDefault();
+  const allValid = Object.keys(rules).map(validateField).every(Boolean);
+  document.getElementById("success").textContent =
+    allValid ? "✔ Signup successful!" : "";
+  if (allValid) form.reset(), document.querySelectorAll("input").forEach(i => i.classList.remove("valid"));
+});
+</script>
+</body>
+</html>
